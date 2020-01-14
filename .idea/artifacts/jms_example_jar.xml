@@ -2,7 +2,7 @@
   <artifact type="jar" name="jms-example:jar">
     <output-path>$PROJECT_DIR$/classes/artifacts/jms_example_jar</output-path>
     <root id="archive" name="jms-example.jar">
-      <element id="module-output" name="jms-example" />
+      <element id="module-output" name="jms" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/io/netty/netty-common/4.1.32.Final/netty-common-4.1.32.Final.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/io/netty/netty-transport/4.1.32.Final/netty-transport-4.1.32.Final.jar" path-in-jar="/" />
