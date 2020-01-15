@@ -1,74 +1,81 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package example;
 
-import org.apache.log4j.Logger;
 import org.apache.qpid.jms.JmsConnectionFactory;
 
 import javax.jms.*;
+import javax.management.*;
 import java.io.Console;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
 
 
-class Producer {
-    private static final Logger LOGGER = Logger.getLogger(Consumer.class);
+class Producer implements ProducerMBean {
 
-    public static void main(String[] args) {
-        try {
+    private static Connection connection;
+    private static Session session;
+    private static MessageProducer producer;
+
+    @Override
+    public void sendMessage(String message) throws JMSException {
+        TextMessage msg = session.createTextMessage(message);
+        producer.send(msg);
+    }
+
+    @Override
+    public void closeConnection() throws JMSException {
+        TextMessage msg = session.createTextMessage("shutdown");
+        producer.send(msg);
+        connection.close();
+        System.exit(1);
+    }
+
+    public static void main(String[] args) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, JMSException {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("example.mbeans:type=Producer");
+        Producer mbean = new Producer();
+        mbs.registerMBean(mbean, name);
+
+
             JmsConnectionFactory factory = new JmsConnectionFactory("amqp://localhost:5672");
-            Connection connection = null;
             connection = factory.createConnection("admin", "password");
             connection.start();
 
-            LOGGER.info("Connected successfully");
 
 
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
             Destination destination = null;
+
+
+
             if (args.length > 0 && args[0].equalsIgnoreCase("QUEUE")) {
                 destination = session.createQueue("MyQueue");
-                LOGGER.info("Created queue");
             } else if (args.length > 0 && args[0].equalsIgnoreCase("TOPIC")) {
                 destination = session.createTopic("MyTopic");
-                LOGGER.info("Created Topic");
             } else {
                 System.out.println("Error: You must specify Queue or Topic");
                 connection.close();
                 System.exit(1);
             }
 
-            MessageProducer producer = session.createProducer(destination);
+            producer = session.createProducer(destination);
 
             Console c = System.console();
             String response;
             do {
 
                 response = c.readLine("Enter message: ");
-
                 TextMessage msg = session.createTextMessage(response);
                 producer.send(msg);
+                if(false){
+                    mbean.sendMessage("");
+                    mbean.closeConnection();
+                }
 
             } while (!response.equalsIgnoreCase("SHUTDOWN"));
             connection.close();
             System.exit(1);
-            LOGGER.info("shutdown");
-        } catch (JMSException e) {
-            e.printStackTrace();
-            LOGGER.info(e);
-        }
+
     }
 }

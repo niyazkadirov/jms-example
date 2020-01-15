@@ -19,23 +19,21 @@ package example;
 // ActiveMQ JMS Provider
 
 import org.apache.qpid.jms.JmsConnectionFactory;
-import org.apache.log4j.Logger;
+
 import javax.jms.*;
 
 // JMS API types
 
 class Consumer {
 
-    private static final Logger LOGGER = Logger.getLogger(Consumer.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         try {
             JmsConnectionFactory factory = new JmsConnectionFactory("amqp://localhost:5672");
             Connection connection = null;
             connection = factory.createConnection("admin", "password");
-            connection.start();
-            LOGGER.info("Connected successfully");
+           // connection.start();
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
@@ -51,16 +49,16 @@ class Consumer {
                 System.exit(1);
             }
 
+
             MessageConsumer consumer = session.createConsumer(destination);
 
-            String body;
-            do {
-                Message msg = consumer.receive();
-                body = ((TextMessage) msg).getText();
 
-                System.out.println("Received = " + body);
+            consumer.setMessageListener(new ConsumerMessageListener("consumer "));
 
-            } while (!body.equalsIgnoreCase("SHUTDOWN"));
+            connection.start();
+
+
+            Thread.sleep(Long.MAX_VALUE);
 
             connection.close();
             System.exit(1);
