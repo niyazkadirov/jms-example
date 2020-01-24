@@ -23,6 +23,7 @@ https://github.com/niyazkadirov/jms-example
 
 > запуск Consumer **java -cp your/local/path/target/original-jms-example-SNAPSHOT.jar example.Consumer Topic**
 
-**example.Producer** - запуск производителя
-**example.Consumer** - запуск потребителя
-**Topic** - запуск топика так же можете выбрать очередь с помощью команды Queue для запуска очереди
+**example.Producer** - запуск производителя   
+**example.Consumer** - запуск потребителя   
+
+**Topic** - запуск топика так же можете выбрать очередь с помощью команды **Queue** для запуска очереди
